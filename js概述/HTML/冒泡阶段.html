@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled 1</title>
+<style>
+body{padding: 0;margin: 0}
+#ancestor1{width: 500px;height: 500px;background: rgb(0,255,255)}
+#father{width: 300px;height: 300px;background: #fff}
+#child{width:100px;height:100px;background: rgb(255,0,0)}
+</style>
+</head>
+<body>
+<div id="ancestor1">祖先
+	<div id="father">父
+		<div id="child">子</div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+function $(id){return document.getElementById(id)}
+
+$('ancestor1').addEventListener('click',function(){alert(this.id)},false);
+$('father').addEventListener('click',function(){alert(this.id)},false);
+$('child').addEventListener('click',function(){alert(this.id)},false);
+</script>
+</html>

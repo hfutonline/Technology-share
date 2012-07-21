@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>pal520cn_Dialog</title>
+<style>
+.pal520cn_dialog{
+	height: 300px;
+	width: 400px;
+	background-color: #ececec;
+	border: 1px solid #b9b9b9;
+	overflow:hidden;
+}
+.pal520cn_title{
+	height: 34px;
+	line-height: 34px;
+	font-size: 12px;
+	background-image: url(images/dialog_tt.png);
+	background-repeat: repeat-x;
+	background-position: 0px -102px;
+	overflow:hidden;
+	margin-top:8px;
+	margin-left:8px;
+	margin-right:8px;
+
+}
+.pal520cn_content{
+	background-color: #fcfaed;
+	border: 1px solid #b9b9b9;
+	margin-top:6px;
+	margin-left:8px;
+	margin-right:8px;
+}
+.pal520cn_title_l{
+	background-image: url(images/dialog_tt.png);
+	background-repeat: no-repeat;
+	background-position: 0px -68px;
+	width: 30px;
+	height: 34px;
+	float: left;
+}
+.pal520cn_normalsize{
+	background-image: url(images/dialog_bt.png);
+	background-position: -34px 0px;
+}
+.pal520cn_minsize{
+	background-image: url(images/dialog_bt.png);
+	background-position: 0px 0px;
+}
+.pal520cn_close,.pal520cn_normalsize,.pal520cn_minsize{
+	height: 34px;
+	width: 34px;
+	float: right;
+}
+.pal520cn_close{
+	background-image: url(images/dialog_bt.png);
+	width: 35px;
+	background-position: -68px 0px;
+}
+.pal520cn_titletext{float:left}
+.pal520cn_clearfloat{clear:both}
+</style>
+</head>
+<body>
+宽度：<input type="text" id="width" value="300" />px
+</ br>
+高度：<input type="text" id="height" value="170" />px
+</ br>
+<button onclick="Cdialog(pal520cn.$_id('width').value,pal520cn.$_id('height').value);">创建新对话框</button>	
+</body>
+<script type="text/javascript">
+var pal520cn = {};
+pal520cn = {
+	$_id: function(id) {
+		return document.getElementById(id);
+	},
+
+	createTag: function(tagName) {
+		var tag = document.createElement(tagName);
+			return tag;
+	},
+
+	createText: function(text) {
+		return text = document.createTextNode(text);
+	},
+
+	addEvent: function(obj, eventType, fn, useCapture) {
+		if(document.attachEvent) {
+				obj.attachEvent('on' + eventType, function(){fn.apply(obj)});
+			} else {
+				obj.addEventListener(eventType, fn, useCapture);
+				}
+	},
+
+	removeEvent:function(obj, eventType, fn, useCapture) {
+		if(document.detachEvent) {
+				alert(obj.onmousemove);
+			} else {
+				obj.removeEventListener(eventType, fn, useCapture);
+				}
+	}
+};
+
+function __Dialog__(nWidth,nHeight,type) {
+		this.width = nWidth;
+		this.height = nHeight;
+		this.type = type || 'prompt'; // prompt or warning
+		this.node;
+		this.titleNode;
+		this.contentNode;
+		this.initialized;
+		
+	if(this.initialized == undefined){//生成对话框
+		__Dialog__.prototype.create = function() {
+			var tempId = new Date();
+			var docBody = document.body;
+			var _DialogWindow = pal520cn.createTag('div');
+			var _DialogTitle = pal520cn.createTag('div');
+			var _DialogBody = pal520cn.createTag('div');
+			_DialogWindow.setAttribute('id', 'tempId' + tempId.getTime());
+			_DialogWindow.setAttribute('class', 'pal520cn_dialog');
+			_DialogTitle.setAttribute('class','pal520cn_title');
+			_DialogBody.setAttribute('class','pal520cn_content');
+			
+			//
+			var titleHtml = '<div class="pal520cn_title_l"></div><span class="pal520cn_titletext" ></span><span class="pal520cn_close"></span><span class="pal520cn_normalsize"></span><span class="pal520cn_minsize"></span><span class=".pal520cn_clearfloat"></span>';
+			_DialogTitle.innerHTML = titleHtml;
+			//
+			this.titleNode = _DialogWindow.appendChild(_DialogTitle);
+			this.contentNode = _DialogWindow.appendChild(_DialogBody);
+			this.node = docBody.appendChild(_DialogWindow);
+
+			//设置DIV初始位置
+			var eleft = (screen.availWidth - this.width) * 0.5;
+			var etop = (screen.availHeight - this.height) * 0.3;
+			this.node.style.position = 'absolute';
+			this.node.style.top = etop + 'px';
+			this.node.style.left = eleft + 'px';
+
+			//处理鼠标移动事件的函数
+			this.node.handleMousemove = function(event) {
+				var event = window.event || event;
+				this.left = event.clientX - this.iDiffX;
+				this.top = event.clientY - this.iDiffY;
+				if(this.left > -1 && this.left < screen.availWidth - this.scrollWidth) {
+					this.style.left = this.left + 'px';
+				}
+				if(this.top > -1 && this.top < screen.availHeight - this.scrollHeight) {
+					this.style.top = this.top + 'px';
+				}			
+			}
+			
+			//绑定鼠标move事件，并且计算出鼠标与DIV的相对位置
+			this.node.attachMousemove = function(event) {
+				var event = window.event || event;
+				this.iDiffX = event.clientX - this.offsetLeft;
+				this.iDiffY = event.clientY - this.offsetTop;
+				pal520cn.addEvent(this, 'mousemove', this.handleMousemove, false);
+			}
+			//删除鼠标move事件
+			this.node.detachMousemove = function() {
+				pal520cn.removeEvent(this, 'mousemove', this.handleMousemove, false);
+			}
+			//为DIV绑定鼠标事件
+			pal520cn.addEvent(this.node, 'mousedown', this.node.attachMousemove, false);
+			pal520cn.addEvent(this.node, 'mouseup', this.node.detachMousemove, false);
+			pal520cn.addEvent(this.titleNode, 'mouseover', function() {this.style.cursor = 'move'}, false);
+			
+			//关闭按钮
+			var clo = this.titleNode.childNodes[2];
+			pal520cn.addEvent(clo, 'mouseover', function() {this.style.backgroundPosition = '-68px 34px';this.style.cursor = 'default'}, false);
+			pal520cn.addEvent(clo, 'mouseout', function() {this.style.backgroundPosition = '-68px 0'}, false);
+			pal520cn.addEvent(clo, 'mousedown', function() {__Dialog__.close(this.parentNode.parentNode.id);}, false);
+			//最大化按钮
+			var max = this.titleNode.childNodes[3];
+			pal520cn.addEvent(max, 'mouseover', function() {this.style.backgroundPosition = '-34px 34px';this.style.cursor = 'default'}, false);
+			pal520cn.addEvent(max, 'mouseout', function() {this.style.backgroundPosition = '-34px 0px'}, false);
+			pal520cn.addEvent(max, 'mousedown', function() {
+				var o = this.parentNode.parentNode;
+				var t = this.parentNode;
+				var c = o.childNodes[1];
+				o.style.width = screen.availWidth + 'px';
+				o.style.height = screen.availHeight + 'px';
+				o.style.top = 0;
+				o.style.left = 0;
+				//
+				//调整title栏宽度
+				t.style.width = screen.availWidth - 2 * t.offsetLeft + 'px';
+				//调整content宽、高
+				c.style.width = parseInt(t.style.width) - 2 + 'px';
+				c.style.height = screen.availHeight - c.offsetTop - t.offsetTop + 'px';
+				}, false);
+			//最小化按钮
+			var min = this.titleNode.childNodes[4];
+			pal520cn.addEvent(min, 'mouseover', function() {this.style.backgroundPosition = '0px 34px';this.style.cursor = 'default'}, false);
+			pal520cn.addEvent(min, 'mouseout', function() {this.style.backgroundPosition = '0px 0px'}, false);
+			pal520cn.addEvent(min, 'mousedown', function() {}, false);
+			
+			//初始化样式
+			this.setStyle();
+		}
+		
+		//样式控制，仅修改可变的CSS属性，静态样式应由CSS文档表设置
+		__Dialog__.prototype.setStyle = function(){
+				//初始化窗体大小
+				this.node.style.width = this.width + 'px';
+				this.node.style.height = this.height + 'px';
+				//调整title栏宽度
+				this.titleNode.style.width = this.width - 2 * this.titleNode.offsetLeft + 'px';
+				//调整content宽、高
+				this.contentNode.style.width = parseInt(this.titleNode.style.width) - 2 + 'px';
+				this.contentNode.style.height = this.height - this.contentNode.offsetTop - this.titleNode.offsetTop + 'px';		
+		}
+		
+		//设置标题文字
+		__Dialog__.prototype.setTitle = function(sText) {
+			var textNode = document.createTextNode(sText);
+			this.titleNode.childNodes[1].appendChild(textNode);
+		}
+		
+		//设置窗体文字
+		__Dialog__.prototype.setContentText = function(sText) {
+			var str = document.createTextNode(sText);
+			this.contentNode.appendChild(str);
+		}
+		
+		//设置窗体HTML代码
+		__Dialog__.prototype.setContentHTML = function(sHtmlstr) {
+			var oldhtmlstr = this.contentNode.innerHTML;
+			this.contentNode.innerHTML = oldhtmlstr + sHtmlstr;
+		}
+		
+		//最大化
+		// __Dialog__.prototype.becomeMaxSize(){{
+// 			
+		// }
+		
+		//最小化
+		// __Dialog__.prototype.becomeMinSize(){
+// 			
+		// }
+		
+		//返回设置尺寸
+		// __Dialog__.prototype.returnNormalSize(){
+// 			
+		// }
+		
+		//关闭窗体，删除DOM节点
+		__Dialog__.close = function(id) {
+			document.body.removeChild(document.getElementById(id));
+		}
+		
+		//所有共享方法已初始化
+		this.initialized = true;
+	}
+}
+</script>
+<script type="text/javascript">
+	var i = 0;
+	var mydialog = new Array();
+	function Cdialog(width,height){
+		mydialog[i] = new __Dialog__(width, height);
+		mydialog[i].create();
+		//mydialog[i].setStyle(this,null);
+		mydialog[i].setTitle('工大学子提示');
+		// mydialog[i].setContentHTML('<center><button onclick =mydialog['+i+'].close()>关闭对话框</button></center>');
+		// i++;
+		// }
+		i++;
+		}
+</script>
+</html>
